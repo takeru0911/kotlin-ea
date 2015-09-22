@@ -62,7 +62,7 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
     /**
      *basic DE/2/bin crossover
      */
-    inline var crossoverOperation: (sol1: Solution, sol2: Solution) -> Solution = {
+    inline var crossoverOperation: (trial: Solution, mutant: Solution) -> Solution = {
         sol1, sol2 ->
         val selectedCrossoverPoint = (Math.random() * prop.numOfDimension).toInt()
         val crossoveredArray = sol1.merge(sol2, {
@@ -82,8 +82,8 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
         Solution(revVars)
     }
 
-    override fun crossover(target: Solution, sol2: Solution): Solution{
-        return crossoverOperation(target, sol2)
+    override fun crossover(trial: Solution, mutant: Solution): Solution{
+        return crossoverOperation(trial, mutant)
     }
 
     override fun mutation(trial: Solution): Solution{
@@ -92,11 +92,11 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
         return mutant
     }
 
-    override fun selection(sol1: Solution, sol2: Solution): Solution{
-        return if(sol1.fitness < sol2.fitness){
-            sol1
+    override fun selection(base: Solution, trial: Solution): Solution{
+        return if(base.fitness < trial.fitness){
+            base
         }else{
-            sol2
+            trial
         }
     }
 

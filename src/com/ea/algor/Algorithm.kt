@@ -6,10 +6,10 @@ package com.ea.algor
  */
 interface Algorithm {
 
-    abstract fun crossover(
-            sol1: Solution, sol2: Solution): Solution
-    abstract fun mutation(
-            target: Solution): Solution
-    abstract fun selection(
-            target: Solution, trial: Solution): Solution
+    fun crossover(
+            trial: Solution, mutant: Solution): Solution
+    fun mutation(
+            trial: Solution): Solution
+    fun selection(
+            base: Solution, trial: Solution): Solution
 }
