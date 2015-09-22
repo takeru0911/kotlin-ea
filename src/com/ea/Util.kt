@@ -7,6 +7,7 @@ import java.util.*
 /**
  * Created by taker on 2015/09/22.
  */
+
 fun randomSelector(numOfrand: Int, start: Int, end: Int): Array<Int>{
     val selectedNumber = ArrayList<Int>()
 
@@ -23,11 +24,20 @@ fun Array<Int>.with2Step(func: (n1: Int, n2: Int) -> Double): List<Double>{
     val list = ArrayList<Double>()
 
     check(this.size() % 2 == 0)
-    for(i in 0 .. this.size() - 1){
+    for(i in 0 .. (this.size() / 2) - 1){
         val index1 = i * 2
         val index2 = i * 2 + 1
-        list.add(func(index1, index2))
+        list.add(func(this[index1], this[index2]))
     }
 
     return list
 }
+inline val revVarBoundary: (v: Double, max: Double, min: Double) -> Double = {
+    v, max, min ->
+    when{
+        v > max -> max
+        v < min -> min
+        else -> v
+    }
+}
+

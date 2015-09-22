@@ -6,5 +6,5 @@ import com.ea.algor.Solution
  * Created by taker on 2015/09/22.
  */
 abstract class Problem(){
-    abstract fun evaluation(solution: Solution);
+    abstract fun evaluation(solution: Solution): Double;
 }

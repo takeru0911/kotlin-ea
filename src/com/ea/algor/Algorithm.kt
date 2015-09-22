@@ -9,7 +9,7 @@ interface Algorithm {
     abstract fun crossover(
             sol1: Solution, sol2: Solution): Solution
     abstract fun mutation(
-            target: Solution, mutant: Solution): Solution
+            target: Solution): Solution
     abstract fun selection(
             target: Solution, trial: Solution): Solution
 }
