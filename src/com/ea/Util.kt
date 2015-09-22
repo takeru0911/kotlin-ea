@@ -32,12 +32,19 @@ fun Array<Int>.with2Step(func: (n1: Int, n2: Int) -> Double): List<Double>{
 
     return list
 }
+fun randomToInt(min: Int, max: Int): Int{
+    return (Math.random() * (max - min)).toInt() + min
+}
+fun randomToDouble(min: Double, max: Double): Double{
+    return (Math.random() * (max - min)) + min
+}
 inline val revVarBoundary: (v: Double, max: Double, min: Double) -> Double = {
     v, max, min ->
-    when{
+    when {
         v > max -> max
         v < min -> min
         else -> v
     }
 }
+
 

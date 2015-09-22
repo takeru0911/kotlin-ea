@@ -1,50 +1,52 @@
 package com.ea.algor.de
 
+import com.ea.*
 import com.ea.algor.Algorithm
 import com.ea.algor.Solution
 import com.ea.prob.Problem
 import com.ea.prob.Sphere
-import com.ea.randomSelector
-import com.ea.revVarBoundary
-import com.ea.with2Step
+
 import java.util.*
 
 /**
  * Created by taker on 2015/09/22.
  */
-open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
+open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
     private var curEvaluateIndex: Int = -1;
 
     inline private val createSolutionByRandom: () -> Solution = {
-        val vars = Array(prop.numOfDimension){
-            Math.random() * (prop.varRangeMax[it] - prop.varRangeMin[it]) + prop.varRangeMin[it]
+        val vars = Array(prop.numOfDimension) {
+            randomToDouble(prop.varRangeMax[it], prop.varRangeMin[it])
         }
-        val revVars = vars.mapIndexed { idx, v ->
-            revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
+        val revVars = vars.mapIndexed {
+            idx,
+            v -> revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
         }.toTypedArray()
 
         Solution(revVars);
 
     }
-    inline private var trialSolutions: Array<Solution> = Array(prop.numOfPopulations){
+    inline private var trialSolutions: Array<Solution> = Array(prop.numOfPopulations) {
         createSolutionByRandom()
     }
     //temp initialization by random
-    inline private var bestSolutions: Array<Solution> = Array(prop.numOfPopulations){
+    inline private var bestSolutions: Array<Solution> = Array(prop.numOfPopulations) {
         createSolutionByRandom()
     }
 
-   inline var createMutationVector: () -> Solution = {
-       ->
-       var selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
-       var selectedBaseVector = -1
-       do {
-           selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
-           selectedBaseVector = (Math.random() * prop.numOfPopulations).toInt()
-       }while(selectedVector.contains(curEvaluateIndex) && selectedVector.contains(selectedBaseVector))
+    inline var createMutationVector: () -> Solution = {
+        ->
+        var selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
+        var selectedBaseVector = -1
+        //TODO: ‚à‚Á‚Æ‚¢‚¢‘‚«•û‚È‚¢‚Ì‚©
+        do {
+            selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
+            selectedBaseVector = randomToInt(0, prop.numOfPopulations);
+        } while (selectedVector.contains(curEvaluateIndex) && selectedVector.contains(selectedBaseVector))
 
-       val selectedBaseVars = bestSolutions[selectedBaseVector].vars
-       val mutantVar = Array(prop.numOfDimension){
+        val selectedBaseVars = bestSolutions[selectedBaseVector].vars
+        //TODO: ˆÈ‰ºØ‚è—£‚·H
+        val mutantVar = Array(prop.numOfDimension) {
             val index = it
             val sum = selectedVector.with2Step {
                 idx1, idx2 ->
@@ -53,9 +55,8 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
                 rightVecValue - leftVecValue
             }.sum()
             sum * prop.F + selectedBaseVars[index]
-
-       }
-       Solution(mutantVar)
+        }
+        Solution(mutantVar)
     }
 
 
@@ -64,50 +65,53 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
      */
     inline var crossoverOperation: (trial: Solution, mutant: Solution) -> Solution = {
         sol1, sol2 ->
-        val selectedCrossoverPoint = (Math.random() * prop.numOfDimension).toInt()
-        val crossoveredArray = sol1.merge(sol2, {
-            v1, v2 ->
-            if(prop.CR > Math.random()){
-                v2
-            }else{
-                v1
-            }
-        })
+        val selectedCrossoverPoint = randomToInt(0, prop.numOfDimension)
+        val crossoveredArray = sol1.merge(
+                sol2,
+                {
+                    v1, v2 ->
+                    if (prop.CR > Math.random()) {
+                        v2
+                    } else {
+                        v1
+                    }
+                }
+        )
         crossoveredArray[selectedCrossoverPoint] = sol2.vars[selectedCrossoverPoint]
 
-        val revVars = crossoveredArray.mapIndexed { idx, v ->
-            revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
+        val revVars = crossoveredArray.mapIndexed {
+            idx,
+            v -> revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
         }.toTypedArray()
 
         Solution(revVars)
     }
 
-    override fun crossover(trial: Solution, mutant: Solution): Solution{
+    override fun crossover(trial: Solution, mutant: Solution): Solution {
         return crossoverOperation(trial, mutant)
     }
 
-    override fun mutation(trial: Solution): Solution{
+    override fun mutation(trial: Solution): Solution {
         val mutant = createMutationVector()
-
         return mutant
     }
 
-    override fun selection(base: Solution, trial: Solution): Solution{
-        return if(base.fitness < trial.fitness){
+    override fun selection(base: Solution, trial: Solution): Solution {
+        return if (base.fitness < trial.fitness) {
             base
-        }else{
+        } else {
             trial
         }
     }
 
-    fun run(){
+    fun run() {
         //init
         trialSolutions.forEach { it.fitness = problem.evaluation(it) }
         bestSolutions = trialSolutions.clone()
         var best = Double.MAX_VALUE;
         var count = 0;
 
-        while(count < prop.functionEvaluations){
+        while (count < prop.functionEvaluations) {
             bestSolutions.forEachIndexed { idx, solution ->
                 curEvaluateIndex = idx
                 val mutant = mutation(solution)
@@ -117,7 +121,7 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
             }
             trialSolutions.forEachIndexed { idx, solution ->
                 bestSolutions[idx] = selection(bestSolutions[idx], solution)
-                if(best > solution.fitness) {
+                if (best > solution.fitness) {
                     best = solution.fitness
                 }
                 count++
@@ -128,7 +132,7 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
     }
 }
 
-fun main(args: Array<String>){
+fun main(args: Array<String>) {
 
     val property = PropertyDE(
             numOfDimension = 3,
@@ -137,10 +141,10 @@ fun main(args: Array<String>){
             CR = 0.1,
             F = 0.9,
             functionEvaluations = 40000,
-            varRangeMax = Array(3){
+            varRangeMax = Array(3) {
                 5.12
             },
-            varRangeMin = Array(3){
+            varRangeMin = Array(3) {
                 -5.12
             }
     )
