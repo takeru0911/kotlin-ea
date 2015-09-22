@@ -14,15 +14,16 @@ import java.util.*
  */
 open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
     private var curEvaluateIndex: Int = -1;
+
     inline private val createSolutionByRandom: () -> Solution = {
-        var vars = Array(prop.numOfDimension){
+        val vars = Array(prop.numOfDimension){
             Math.random() * (prop.varRangeMax[it] - prop.varRangeMin[it]) + prop.varRangeMin[it]
         }
-        vars = vars.mapIndexed { idx, v ->
+        val revVars = vars.mapIndexed { idx, v ->
             revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
         }.toTypedArray()
 
-        Solution(vars, 0.0);
+        Solution(revVars);
 
     }
     inline private var trialSolutions: Array<Solution> = Array(prop.numOfPopulations){
@@ -36,13 +37,14 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
    inline var createMutationVector: () -> Solution = {
        ->
        var selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
-       var selectedRandVector = -1
+       var selectedBaseVector = -1
        do {
            selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
-           selectedRandVector = (Math.random() * prop.numOfPopulations).toInt()
-       }while(selectedVector.contains(curEvaluateIndex) && selectedVector.contains(selectedRandVector))
-       val array = bestSolutions[selectedRandVector].vars
-       var mutantVar = Array(prop.numOfDimension){
+           selectedBaseVector = (Math.random() * prop.numOfPopulations).toInt()
+       }while(selectedVector.contains(curEvaluateIndex) && selectedVector.contains(selectedBaseVector))
+
+       val selectedBaseVars = bestSolutions[selectedBaseVector].vars
+       val mutantVar = Array(prop.numOfDimension){
             val index = it
             val sum = selectedVector.with2Step {
                 idx1, idx2 ->
@@ -50,10 +52,10 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
                 val leftVecValue = bestSolutions[idx2].vars[index]
                 rightVecValue - leftVecValue
             }.sum()
-            sum * prop.F + array[index]
+            sum * prop.F + selectedBaseVars[index]
 
        }
-       Solution(mutantVar, 0.0)
+       Solution(mutantVar)
     }
 
 
@@ -63,7 +65,7 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
     inline var crossoverOperation: (sol1: Solution, sol2: Solution) -> Solution = {
         sol1, sol2 ->
         val selectedCrossoverPoint = (Math.random() * prop.numOfDimension).toInt()
-        var crossoveredArray = sol1.merge(sol2, {
+        val crossoveredArray = sol1.merge(sol2, {
             v1, v2 ->
             if(prop.CR > Math.random()){
                 v2
@@ -73,11 +75,11 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
         })
         crossoveredArray[selectedCrossoverPoint] = sol2.vars[selectedCrossoverPoint]
 
-        crossoveredArray = crossoveredArray.mapIndexed { idx, v ->
+        val revVars = crossoveredArray.mapIndexed { idx, v ->
             revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
         }.toTypedArray()
 
-        Solution(crossoveredArray, 0.0)
+        Solution(revVars)
     }
 
     override fun crossover(target: Solution, sol2: Solution): Solution{
@@ -96,9 +98,6 @@ open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
         }else{
             sol2
         }
-    }
-    fun evaluate(vars: Array<Double>, func: (Array<Double>) -> Double): Double{
-        return func(vars)
     }
 
     fun run(){
