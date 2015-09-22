@@ -3,50 +3,94 @@ package com.ea.algor.de
 import com.ea.algor.Algorithm
 import com.ea.algor.Solution
 import com.ea.prob.Problem
+import com.ea.randomSelector
+import com.ea.with2Step
 
 /**
  * Created by taker on 2015/09/22.
  */
-open class DE(problem: Problem) :Algorithm{
-    private val CR: Double = 0.1
-    //extention function list<Double> to array<Double>
-    fun List<Double>.asArray(): Array<Double>  {
-        var array: Array<Double> = Array<Double>(this.size()){
-            0.0
-        }
-        for((idx, value) in this.withIndex()){
-            array[idx] = value;
-        }
-        return array
+open class DE(val problem: Problem, val prop: PropertyDE) :Algorithm{
+    inline private var trialSolutions: Array<Solution> = Array(prop.numOfPopulations){
+        createSolutionByRandom()
     }
-    //basic DE/2/bin crossover
-    private val basicCrossover: (sol1: Solution, sol2: Solution) -> Solution = {
-        (sol1, sol2) ->
-        val var1 = sol1.vars
-        val var2 = sol2.vars
-        val crossovered: List<Double> =  var1.merge(var2){
-            (v1, v2) ->
-            if(0.1 > Math.random()){
+    //temp initialization by random
+    inline private var bestSolutions: Array<Solution> = Array(prop.numOfPopulations){
+        createSolutionByRandom()
+    }
+
+    inline private val createSolutionByRandom: () -> Solution = {
+        var vars = Array(prop.numOfDimension){
+            Math.random()
+        }
+        vars.forEachIndexed {idx, v ->
+            revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
+        }
+        Solution(vars, 0.0);
+
+    }
+
+    inline private val revVarBoundary: (v: Double, max: Double, min: Double) -> Double = {
+        v, max, min ->
+        when{
+            v > max -> max
+            v < min -> min
+            else -> v
+        }
+    }
+   inline var createMutationVector: () -> Solution = {
+        ->
+        val selectedVector = randomSelector(prop.numOfDiffSol, 0, prop.numOfPopulations)
+        var mutantVar = Array(prop.numOfDimension){
+
+            var index = it
+            val sum = selectedVector.with2Step {
+                idx1, idx2 ->
+                val rightVecValue = bestSolutions[idx1].vars[index]
+                val leftVecValue = bestSolutions[idx2].vars[index]
+                rightVecValue - leftVecValue
+            }.sum()
+
+            sum * prop.F
+        }
+       Solution(mutantVar, 0.0)
+    }
+
+
+    /**
+     *basic DE/2/bin crossover
+     */
+    inline var crossoverOperation: (sol1: Solution, sol2: Solution) -> Solution = {
+        sol1, sol2 ->
+        val crossoveredArray = sol1.merge(sol2, {
+            v1, v2 ->
+            if(prop.CR > Math.random()){
                 v1
             }else{
                 v2
             }
+        })
+        Solution(crossoveredArray, 0.0)
+    }
+
+
+    override fun crossover(target: Solution, sol2: Solution): Solution{
+        return crossoverOperation(target, sol2)
+    }
+
+    override fun mutation(trial: Solution, mutant: Solution): Solution{
+        var vars: Array<Double> = trial.merge(mutant,{
+            v1, v2 ->
+            v1 - v2
+        })
+        return Solution(vars, 0.0)
+    }
+
+    override fun selection(sol1: Solution, sol2: Solution): Solution{
+        return if(sol1.fitness > sol2.fitness){
+            sol1
+        }else{
+            sol2
         }
-        Solution(crossovered.asArray(), 0.0)
-    }
-
-    override protected fun crossover(sol1: Solution, sol2: Solution): Solution{
-        return this.crossover(sol1, sol2, this.basicCrossover);
-    }
-    private fun crossover(sol1: Solution, sol2: Solution, func: (sol1: Solution, sol2: Solution) -> Solution): Solution{
-        return func(sol1, sol2)
-    }
-
-    override protected  fun mutation(sol1: Solution, sol2: Solution): Solution{
-
-    }
-    override protected  fun selection(sol1: Solution, sol2: Solution): Solution{
-
     }
 
 }
