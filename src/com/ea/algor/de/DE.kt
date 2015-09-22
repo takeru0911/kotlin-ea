@@ -12,7 +12,7 @@ import java.util.*
  * Created by taker on 2015/09/22.
  */
 open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
-    private var curEvaluateIndex: Int = -1;
+    var curEvaluateIndex: Int = -1;
 
     private val trialSolutions: Array<Solution> = Array(prop.numOfPopulations) {
         createSolutionByRandom(prop.varRangeMin, prop.varRangeMax)
@@ -25,14 +25,10 @@ open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
     inline var createMutationVector: () -> Solution = {
         ->
         var selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
-        var selectedBaseVector = -1
         //TODO: ‚à‚Á‚Æ‚¢‚¢‘‚«•û‚È‚¢‚Ì‚©
         do {
             selectedVector = randomSelector(prop.numOfDiffSol * 2, 0, prop.numOfPopulations)
-            selectedBaseVector = randomToInt(0, prop.numOfPopulations);
-        } while (selectedVector.contains(curEvaluateIndex) && selectedVector.contains(selectedBaseVector))
-
-        val selectedBaseVars = bestSolutions[selectedBaseVector].vars
+        } while (selectedVector.contains(curEvaluateIndex))
         //TODO: ˆÈ‰ºØ‚è—£‚·H
         val mutantVar = Array(prop.numOfDimension) {
             val index = it
@@ -42,11 +38,10 @@ open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
                 val leftVecValue = bestSolutions[idx2].vars[index]
                 rightVecValue - leftVecValue
             }.sum()
-            sum * prop.F + selectedBaseVars[index]
+            sum * prop.F
         }
         Solution(mutantVar)
     }
-
 
     /**
      *basic DE/2/bin crossover
@@ -71,21 +66,36 @@ open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
         Solution(revVars)
     }
 
+    inline var mutateSolution: (Solution, Solution) -> Solution = {
+        trial, mutation ->
+        val mutatedVars = trial.merge(mutation,{
+            v1, v2 ->
+            v1 + v2 * prop.F
+        })
+        Solution(mutatedVars)
+    }
+
+    inline var selectWhichSolution: (Solution, Solution) -> Solution = {
+        base, trial ->
+        if (base.fitness < trial.fitness) {
+            base
+        } else {
+            trial
+        }
+    }
+
     override fun crossover(trial: Solution, mutant: Solution): Solution {
         return crossoverOperation(trial, mutant)
     }
 
     override fun mutation(trial: Solution): Solution {
         val mutant = createMutationVector()
-        return mutant
+
+        return mutateSolution(trial, mutant)
     }
 
     override fun selection(base: Solution, trial: Solution): Solution {
-        return if (base.fitness < trial.fitness) {
-            base
-        } else {
-            trial
-        }
+        return selectWhichSolution(base, trial)
     }
 
     fun run() {
@@ -119,16 +129,16 @@ open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
 fun main(args: Array<String>) {
 
     val property = PropertyDE(
-            numOfDimension = 3,
+            numOfDimension = 50,
             numOfDiffSol = 1,
-            numOfPopulations = 5,
+            numOfPopulations = 100,
             CR = 0.1,
             F = 0.9,
-            functionEvaluations = 40000,
-            varRangeMax = Array(3) {
+            functionEvaluations = 400000,
+            varRangeMax = Array(50) {
                 5.12
             },
-            varRangeMin = Array(3) {
+            varRangeMin = Array(50) {
                 -5.12
             }
     )
