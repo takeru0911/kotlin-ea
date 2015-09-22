@@ -14,24 +14,12 @@ import java.util.*
 open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
     private var curEvaluateIndex: Int = -1;
 
-    inline private val createSolutionByRandom: () -> Solution = {
-        val vars = Array(prop.numOfDimension) {
-            randomToDouble(prop.varRangeMax[it], prop.varRangeMin[it])
-        }
-        val revVars = vars.mapIndexed {
-            idx,
-            v -> revVarBoundary(v, prop.varRangeMax[idx], prop.varRangeMin[idx])
-        }.toTypedArray()
-
-        Solution(revVars);
-
-    }
-    inline private var trialSolutions: Array<Solution> = Array(prop.numOfPopulations) {
-        createSolutionByRandom()
+    private val trialSolutions: Array<Solution> = Array(prop.numOfPopulations) {
+        createSolutionByRandom(prop.varRangeMin, prop.varRangeMax)
     }
     //temp initialization by random
-    inline private var bestSolutions: Array<Solution> = Array(prop.numOfPopulations) {
-        createSolutionByRandom()
+    private var bestSolutions: Array<Solution> = Array(prop.numOfPopulations) {
+        createSolutionByRandom(prop.varRangeMin, prop.varRangeMax)
     }
 
     inline var createMutationVector: () -> Solution = {
@@ -70,11 +58,7 @@ open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
                 sol2,
                 {
                     v1, v2 ->
-                    if (prop.CR > Math.random()) {
-                        v2
-                    } else {
-                        v1
-                    }
+                    getWhichValueByRand(v1, v2, prop.CR)
                 }
         )
         crossoveredArray[selectedCrossoverPoint] = sol2.vars[selectedCrossoverPoint]

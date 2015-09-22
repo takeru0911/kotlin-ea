@@ -1,6 +1,7 @@
 package com.ea
 
 
+import com.ea.algor.Solution
 import java.util
 import java.util.*
 
@@ -47,4 +48,16 @@ inline val revVarBoundary: (v: Double, max: Double, min: Double) -> Double = {
     }
 }
 
+fun getWhichValueByRand(v1: Double, v2: Double, compareToRand: Double): Double{
+    return if(compareToRand > Math.random()){
+        v1
+    }else{
+        v2
+    }
+}
 
+fun createSolutionByRandom(boundsOfMax: Array<Double>, boudsOfMin: Array<Double>): Solution{
+    return Solution(Array(boundsOfMax.size()) {
+        randomToDouble(boudsOfMin[it], boundsOfMax[it])
+    })
+}
