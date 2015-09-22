@@ -6,12 +6,10 @@ package com.ea.algor
  */
 interface Algorithm {
 
-    fun run(){
-        mutation()
-        crossover()
-        selection()
-    }
-    abstract protected fun crossover()
-    abstract protected fun mutation()
-    abstract protected fun selection()
+    abstract protected fun crossover(
+            sol1: Solution, sol2: Solution): Solution
+    abstract protected fun mutation(
+            sol1: Solution, sol2: Solution): Solution
+    abstract protected fun selection(
+            sol1: Solution, sol2: Solution): Solution
 }
