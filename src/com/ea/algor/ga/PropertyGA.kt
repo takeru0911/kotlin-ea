@@ -7,7 +7,6 @@ data class PropertyGA(
         val functionevaluations: Int,
         val numOfPopulation: Int,
         val numOfDimension: Int,
-        val nuOfElite: Int,
         val CR: Double,
         val mutationRate: Double
 )

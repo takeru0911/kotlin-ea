@@ -4,6 +4,7 @@ import com.ea.algor.Algorithm
 import com.ea.algor.Solution
 import com.ea.createBinarySolutionByRandom
 import com.ea.prob.Problem
+import com.ea.prob.Sphere
 import com.ea.randomSelector
 import java.util
 import java.util.*
@@ -61,10 +62,7 @@ fun decideCrossoverSolutionByRoulette(rouletteTable: Array<Double>): Int {
 class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
     var curEvaluatedIndex = -1
     private var crossoverMask: Array<Int>? = null
-    //evaluate solution
-    var trialSolutions = Array(prop.numOfPopulation) {
-        createBinarySolutionByRandom(prop.numOfDimension)
-    }
+
     //parent solution
     var parentSolutions = Array(prop.numOfPopulation) {
         createBinarySolutionByRandom(prop.numOfDimension)
@@ -157,7 +155,7 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
                 while(parent1 == parent2){
                     parent2 = decideCrossoverSolutionByRoulette(rouletteTable)
                 }
-                makeCrossoverMask(prop.numOfDimension)
+                crossoverMask = makeCrossoverMask(prop.numOfDimension)
                 //crossover
                 var child1 = crossover(parentSolutions[parent1], parentSolutions[parent2])
                 var child2 = crossover(parentSolutions[parent2], parentSolutions[parent1])
@@ -180,4 +178,16 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
             parentSolutions = survivor.toTypedArray()
         }
     }
+}
+fun main(args: Array<String>){
+    val problem = Sphere()
+    val property = PropertyGA(
+            functionevaluations = 40000,
+            numOfPopulation = 30,
+            numOfDimension = 5,
+            CR = 0.4,
+            mutationRate = 0.01
+    )
+    val solver = GA(problem, property)
+    solver.run()
 }
