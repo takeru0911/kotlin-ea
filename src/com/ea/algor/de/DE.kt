@@ -124,10 +124,10 @@ open class DE(val problem: Problem, val prop: PropertyDE) : Algorithm {
         }
         println(count)
     }
+
 }
 
 fun main(args: Array<String>) {
-
     val property = PropertyDE(
             numOfDimension = 50,
             numOfDiffSol = 1,

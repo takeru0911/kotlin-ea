@@ -9,6 +9,9 @@ import java.util.*
  * Created by taker on 2015/09/22.
  */
 
+/**
+ * d•¡–³‚µ‚Åƒ‰ƒ“ƒ_ƒ€‚É”CˆÓ‚Ì”‚ÌInt‚Ì”z—ñ‚ğ•Ô‚·
+ */
 fun randomSelector(numOfrand: Int, start: Int, end: Int): Array<Int>{
     val selectedNumber = ArrayList<Int>()
 
@@ -59,5 +62,15 @@ fun getWhichValueByRand(v1: Double, v2: Double, compareToRand: Double): Double{
 fun createSolutionByRandom(boundsOfMax: Array<Double>, boudsOfMin: Array<Double>): Solution{
     return Solution(Array(boundsOfMax.size()) {
         randomToDouble(boudsOfMin[it], boundsOfMax[it])
+    })
+}
+
+fun createBinarySolutionByRandom(dimension: Int): Solution{
+    return Solution(Array(dimension) {
+        if(Math.random() > 0.5){
+            0.0
+        }else{
+            1.0
+        }
     })
 }
