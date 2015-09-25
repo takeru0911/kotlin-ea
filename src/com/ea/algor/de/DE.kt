@@ -4,7 +4,7 @@ import com.ea.*
 import com.ea.algor.Algorithm
 import com.ea.algor.Solution
 import com.ea.prob.Problem
-import com.ea.prob.Sphere
+import com.ea.prob.real.Sphere
 
 import java.util.*
 

@@ -4,7 +4,7 @@ import com.ea.*
 import com.ea.algor.Solution
 import com.ea.algor.de.DE
 import com.ea.algor.de.PropertyDE
-import com.ea.prob.Sphere;
+import com.ea.prob.real.Sphere;
 
 /**
  * Created by taker on 2015/09/23.

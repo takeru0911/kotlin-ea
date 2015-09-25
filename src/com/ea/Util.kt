@@ -74,3 +74,14 @@ fun createBinarySolutionByRandom(dimension: Int): Solution{
         }
     })
 }
+
+fun Array<Int>.filterwithIndexed(func: (index: Int, value: Int) -> Boolean): Array<Int>{
+    val filteredList = ArrayList<Int>()
+    for(i in 0 .. this.size() - 1){
+        if(func(i, this[i])){
+            filteredList.add(this[i])
+        }
+    }
+
+    return filteredList.toTypedArray()
+}

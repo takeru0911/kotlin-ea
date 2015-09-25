@@ -1,6 +1,7 @@
-package com.ea.prob
+package com.ea.prob.real
 
 import com.ea.algor.Solution
+import com.ea.prob.Problem
 
 /**
  * Created by taker on 2015/09/22.

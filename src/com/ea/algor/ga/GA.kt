@@ -4,7 +4,7 @@ import com.ea.algor.Algorithm
 import com.ea.algor.Solution
 import com.ea.createBinarySolutionByRandom
 import com.ea.prob.Problem
-import com.ea.prob.Sphere
+import com.ea.prob.real.Sphere
 import com.ea.randomSelector
 import java.util
 import java.util.*
