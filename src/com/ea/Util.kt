@@ -24,7 +24,7 @@ fun randomSelector(numOfrand: Int, start: Int, end: Int): Array<Int>{
     }
     return selectedNumber.toTypedArray()
 }
-fun Array<Int>.with2Step(func: (n1: Int, n2: Int) -> Double): List<Double>{
+fun <T> Array<T>.with2Step(func: (n1: T, n2: T) -> Double): List<Double>{
     val list = ArrayList<Double>()
 
     check(this.size() % 2 == 0)
@@ -75,13 +75,13 @@ fun createBinarySolutionByRandom(dimension: Int): Solution{
     })
 }
 
-fun Array<Int>.filterwithIndexed(func: (index: Int, value: Int) -> Boolean): Array<Int>{
-    val filteredList = ArrayList<Int>()
+fun <T> Array<T>.filterwithIndexed(func: (index: Int, value: T) -> Boolean): List<T>{
+    val filteredList = ArrayList<T>()
     for(i in 0 .. this.size() - 1){
         if(func(i, this[i])){
             filteredList.add(this[i])
         }
     }
 
-    return filteredList.toTypedArray()
+    return filteredList
 }

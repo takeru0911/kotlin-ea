@@ -4,6 +4,7 @@ import com.ea.algor.Algorithm
 import com.ea.algor.Solution
 import com.ea.createBinarySolutionByRandom
 import com.ea.prob.Problem
+import com.ea.prob.bin.KP
 import com.ea.prob.real.Sphere
 import com.ea.randomSelector
 import java.util
@@ -132,7 +133,7 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
         randomSelector(numOfSurvivor, 0, prop.numOfPopulation)
     }
     fun run() {
-        var best = Double.MAX_VALUE
+        var best = Double.MIN_VALUE
         var count = 0
         check((prop.numOfPopulation * prop.CR) % 2.0 == 0.0)
 
@@ -169,6 +170,12 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
                 survivor.add(selection(parentSolutions[parent1], child1))
                 survivor.add(selection(parentSolutions[parent2], child2))
                 count += 2
+                best = when{
+                    child1.fitness > best -> child1.fitness
+                    child2.fitness > best -> child2.fitness
+                    else -> best
+                }
+                println(child1.fitness)
             }
             val selectedIndex = selectSurviveSolutions((prop.numOfPopulation - numOfCrossover).toInt())
 
@@ -176,11 +183,12 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
                 survivor.add(parentSolutions[it])
             }
             parentSolutions = survivor.toTypedArray()
+            println(best)
         }
     }
 }
 fun main(args: Array<String>){
-    val problem = Sphere()
+
     val property = PropertyGA(
             functionevaluations = 40000,
             numOfPopulation = 30,
@@ -188,6 +196,7 @@ fun main(args: Array<String>){
             CR = 0.4,
             mutationRate = 0.01
     )
+    val problem = KP(property.numOfDimension)
     val solver = GA(problem, property)
     solver.run()
 }
