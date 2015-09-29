@@ -15,6 +15,10 @@ class KP(dimension: Int): Problem(){
     private val value = Array(dimension){
         (Math.random() * 100).toInt()
     }
+    init{
+        println(Arrays.toString(weight))
+        println(Arrays.toString((value)))
+    }
     private val capacity = weight.sum() / 2
 
     override fun evaluation(solution: Solution): Double{

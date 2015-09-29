@@ -85,3 +85,7 @@ fun <T> Array<T>.filterwithIndexed(func: (index: Int, value: T) -> Boolean): Lis
 
     return filteredList
 }
+
+fun <T> Array<T>.toStr(): String{
+    return this.joinToString(",", "[", "]")
+}

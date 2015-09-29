@@ -7,6 +7,7 @@ import com.ea.prob.Problem
 import com.ea.prob.bin.KP
 import com.ea.prob.real.Sphere
 import com.ea.randomSelector
+import com.ea.toStr
 import java.util
 import java.util.*
 
@@ -31,13 +32,14 @@ fun makeCrossoverMask(maskLength: Int): Array<Int> {
 
 /**
  * make roulette table for crossover.
+ * fitness ‚ª0‚Ìê‡â‘Î‘I‘ğ‚³‚ê‚È‚¢‚Ì‚Å‚·‚×‚Ä‚ÌŒÂ‘Ì‚Ìfitness‚É+0.1‚·‚é‚±‚Æ‚Å‰ñ”ğ‚·‚é
  */
 fun makeRouletteByFitness(parents: Array<Solution>): Array<Double>{
     val sum = parents.map {
-        solution -> solution.fitness
+        solution -> solution.fitness + 0.1
     }.sum()
     val rouletteTable = Array(parents.size()){
-        parents[it].fitness / sum
+        (parents[it].fitness + 0.1) / sum
     }
 
     return rouletteTable
@@ -99,7 +101,7 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
         val mutatedVars = target.vars.map {
             v ->
             if (prop.CR > Math.random()) {
-                Math.abs(v - 1)
+                if(v == 0.0) 1.0 else 0.0
             } else {
                 v
             }
@@ -133,10 +135,10 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
         randomSelector(numOfSurvivor, 0, prop.numOfPopulation)
     }
     fun run() {
-        var best = Double.MIN_VALUE
+
         var count = 0
         check((prop.numOfPopulation * prop.CR) % 2.0 == 0.0)
-
+        var best = Double.MIN_VALUE
         parentSolutions.forEachIndexed { idx, solution ->
             curEvaluatedIndex = idx
             solution.fitness = problem.evaluation(solution)
@@ -175,14 +177,15 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
                     child2.fitness > best -> child2.fitness
                     else -> best
                 }
-                println(child1.fitness)
+
+
             }
             val selectedIndex = selectSurviveSolutions((prop.numOfPopulation - numOfCrossover).toInt())
-
             selectedIndex.forEach {
                 survivor.add(parentSolutions[it])
             }
             parentSolutions = survivor.toTypedArray()
+
             println(best)
         }
     }
@@ -190,11 +193,11 @@ class GA(val problem: Problem,val prop: PropertyGA) : Algorithm {
 fun main(args: Array<String>){
 
     val property = PropertyGA(
-            functionevaluations = 40000,
+            functionevaluations = 30000,
             numOfPopulation = 30,
-            numOfDimension = 5,
-            CR = 0.4,
-            mutationRate = 0.01
+            numOfDimension = 250,
+            CR = 0.6,
+            mutationRate = 0.05
     )
     val problem = KP(property.numOfDimension)
     val solver = GA(problem, property)
